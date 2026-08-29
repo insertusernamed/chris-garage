@@ -1,0 +1,31 @@
+:root {
+  --paper: #f3ead8;
+  --paper-2: #e7dcc6;
+  --ink: #1a1814;
+  --ink-dim: #6a6258;
+  --ink-faint: #8a8174;
+  --rule: #d2c4aa;
+  --pen: #1b5c43;
+  --pen-dim: #3d7a5c;
+  --pen-soft: rgba(27, 92, 67, 0.16);
+
+  --well: #18211c;
+  --well-ink: #f3ead8;
+  --well-dim: #9aafa3;
+  --well-grid: rgba(243, 234, 216, 0.13);
+  --trace: #8fddb5;
+  --trace-fill: rgba(143, 221, 181, 0.2);
+
+  --sans: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --display: 'Barlow Condensed', 'Barlow', 'Helvetica Neue', sans-serif;
+
+  --page: min(1180px, calc(100% - 3rem));
+  --header-h: 3.4rem;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 720px) {
+  :root {
+    --page: calc(100% - 1.6rem);
+  }
+}

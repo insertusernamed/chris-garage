@@ -1,31 +1,5 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "app.js",
-            "use": "@vercel/node"
-        },
-        {
-            "src": "public/**/*",
-            "use": "@vercel/static"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/stylesheets/(.*)",
-            "dest": "/public/stylesheets/$1"
-        },
-        {
-            "src": "/images/(.*)",
-            "dest": "/public/images/$1"
-        },
-        {
-            "src": "/javascripts/(.*)",
-            "dest": "/public/javascripts/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/app.js"
-        }
-    ]
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }

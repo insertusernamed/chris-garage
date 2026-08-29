@@ -31,9 +31,17 @@
         <path v-if="area" class="area" :d="area" />
         <path v-if="line" class="line" :d="line" />
         <line v-if="hover" class="hair" :x1="hover.x" :x2="hover.x" y1="0" y2="280" />
-        <circle v-if="hover" class="dot" :cx="hover.x" :cy="hover.y" r="4.5" />
-        <circle v-if="end" class="end" :cx="end.x" :cy="end.y" r="4" />
       </svg>
+      <span
+        v-if="end"
+        class="mark end"
+        :style="markStyle(end)"
+      />
+      <span
+        v-if="hover"
+        class="mark hover-dot"
+        :style="markStyle(hover)"
+      />
 
       <div class="y-labels" aria-hidden="true">
         <span v-for="tick in yTicks" :key="tick.value" :style="{ top: tick.top }">
@@ -104,7 +112,9 @@ const props = withDefaults(
 )
 
 const hover = ref<Mark | null>(null)
+const W = 1000
 const H = 280
+const PAD_Y = 16
 
 const series = computed(() =>
   props.points
@@ -127,16 +137,22 @@ const domain = computed(() => {
 
 function xAt(t: number) {
   const d = domain.value
-  if (!d || d.tMax <= d.tMin) return 1000
-  return ((t - d.tMin) / (d.tMax - d.tMin)) * 1000
+  if (!d || d.tMax <= d.tMin) return W
+  return ((t - d.tMin) / (d.tMax - d.tMin)) * W
 }
 
 function yAt(value: number) {
   const d = domain.value
   if (!d) return H / 2
-  const pad = 16
   const span = d.max - d.min || 1
-  return pad + (1 - (value - d.min) / span) * (H - pad * 2)
+  return PAD_Y + (1 - (value - d.min) / span) * (H - PAD_Y * 2)
+}
+
+function markStyle(mark: Mark) {
+  return {
+    left: `${(mark.x / W) * 100}%`,
+    top: `${(mark.y / H) * 100}%`,
+  }
 }
 
 function markAt(index: number): Mark | null {
@@ -147,7 +163,7 @@ function markAt(index: number): Mark | null {
   return {
     x,
     y: yAt(p.value),
-    left: `${(x / 1000) * 100}%`,
+    left: `${(x / W) * 100}%`,
     value: `${props.formatValue(p.value)} ${props.yLabel}`,
     when: formatTooltipTime(p.t),
     edge: x < 140 ? 'start' : x > 820 ? 'end' : undefined,
@@ -190,7 +206,7 @@ const xLabels = computed(() => {
   const fmt = props.longTime ? formatAxisDate : formatAxisTime
   const minPct = 11
   const interiors = vTicks.value.filter((tick) => {
-    const pct = (tick.x / 1000) * 100
+    const pct = (tick.x / W) * 100
     return pct >= minPct && pct <= 100 - minPct
   })
   return [
@@ -198,7 +214,7 @@ const xLabels = computed(() => {
     ...interiors.map((tick) => ({
       t: tick.t,
       text: fmt(tick.t),
-      left: `${(tick.x / 1000) * 100}%`,
+      left: `${(tick.x / W) * 100}%`,
       edge: '' as const,
     })),
     { t: d.tMax, text: fmt(d.tMax), left: '100%', edge: 'end' as const },
@@ -228,7 +244,7 @@ function onPointer(event: PointerEvent) {
   if (!svg) return
   const rect = svg.getBoundingClientRect()
   if (rect.width <= 0) return
-  const x = ((event.clientX - rect.left) / rect.width) * 1000
+  const x = ((event.clientX - rect.left) / rect.width) * W
   hover.value = markAt(closestIndex(x))
 }
 
@@ -254,8 +270,7 @@ function onKey(event: KeyboardEvent) {
 .chart {
   background: var(--well);
   color: var(--well-ink);
-  padding: 0.85rem 0.45rem 1rem 0;
-  padding-left: max(0.85rem, calc((100% - var(--page)) / 2));
+  padding: 0.85rem 0.7rem 1rem 0.85rem;
 }
 
 .plot {
@@ -264,6 +279,7 @@ function onKey(event: KeyboardEvent) {
   min-height: 16.5rem;
   cursor: crosshair;
   outline: none;
+  overflow: visible;
 }
 
 .plot:focus-visible {
@@ -308,14 +324,25 @@ svg {
   vector-effect: non-scaling-stroke;
 }
 
-.dot {
-  fill: var(--well-ink);
+.mark {
+  position: absolute;
+  z-index: 2;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
 }
 
-.end {
-  fill: var(--trace);
-  stroke: var(--well);
-  stroke-width: 2;
+.mark.end {
+  background: var(--trace);
+  box-shadow: 0 0 0 2px var(--well);
+}
+
+.mark.hover-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--well-ink);
 }
 
 .y-labels {

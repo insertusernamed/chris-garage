@@ -158,8 +158,7 @@ const empty = computed(() =>
 }
 
 .inner {
-  width: var(--page);
-  margin: 0 auto;
+  padding: 0 0.7rem 0 0.85rem;
 }
 
 .head {

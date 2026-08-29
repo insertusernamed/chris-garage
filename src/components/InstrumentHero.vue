@@ -148,8 +148,8 @@ const facts = computed(() => {
   margin: 0 auto;
   padding: 2.2rem 0 1.6rem;
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(16rem, 0.95fr);
-  gap: 2rem 3rem;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 26rem);
+  gap: 2rem 3.5rem;
   align-items: end;
 }
 

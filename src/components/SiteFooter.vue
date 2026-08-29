@@ -15,7 +15,6 @@
 }
 
 p {
-  max-width: 42rem;
   font-size: 0.88rem;
   color: var(--ink-dim);
 }

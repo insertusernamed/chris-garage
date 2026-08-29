@@ -19,7 +19,7 @@
   --sans: 'Barlow', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --display: 'Barlow Condensed', 'Barlow', 'Helvetica Neue', sans-serif;
 
-  --page: min(1180px, calc(100% - 3rem));
+  --page: calc(100% - 2.5rem);
   --header-h: 3.4rem;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }

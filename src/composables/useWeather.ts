@@ -30,6 +30,7 @@ const archiveCachedAt = ref(0)
 const forecast = ref<WeatherForecast | null>(null)
 const error = ref<string | null>(null)
 const connected = ref(false)
+const hoverPreview = ref<WeatherReading | null>(null)
 let started = false
 let pollTimer: number | undefined
 let hourTimer: number | undefined
@@ -308,6 +309,7 @@ export function useWeather() {
         unit,
         live,
         hour,
+        hoverPreview,
         archive,
         archiveMeta,
         archiveLoading,

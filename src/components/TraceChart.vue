@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import {
     formatAxisDate,
     formatAxisTime,
@@ -90,6 +90,7 @@ export type ChartPoint = {
 }
 
 type Mark = {
+    t: number
     x: number
     y: number
     left: string
@@ -111,7 +112,12 @@ const props = withDefaults(
     { empty: 'No samples yet.', minSpan: 0 },
 )
 
+const emit = defineEmits<{ (e: 'preview', t: number | null): void }>()
+
 const hover = ref<Mark | null>(null)
+watch(hover, (h) => emit('preview', h ? h.t : null))
+// If the chart is swapped out or a range/series remounts, stop the shared preview.
+onUnmounted(() => emit('preview', null))
 const W = 1000
 const H = 280
 const PAD_Y = 16
@@ -161,6 +167,7 @@ function markAt(index: number): Mark | null {
     if (!p) return null
     const x = xAt(p.t)
     return {
+        t: p.t,
         x,
         y: yAt(p.value),
         left: `${(x / W) * 100}%`,

@@ -85,11 +85,11 @@
             :points="points"
             :y-label="yLabel"
             :format-value="formatValue"
-            :min-span="minSpan"
-            :long-time="range === 'archive'"
-            :aria="aria"
-            :empty="empty"
-        />
+            :min-span="minSpan"                :long-time="range === 'archive'"
+                :aria="aria"
+                :empty="empty"
+                @preview="onPreview"
+            />
     </section>
 </template>
 
@@ -103,7 +103,7 @@ type SeriesId = 'temperature' | 'humidity' | 'pressure'
 type RangeId = 'hour' | 'archive'
 type PresetId = 'custom' | '1d' | '7d' | '30d' | '90d' | '1y'
 
-const { hour, live, unit, queryArchive } = useWeather()
+const { hour, live, unit, queryArchive, hoverPreview } = useWeather()
 const active = ref<SeriesId>('temperature')
 const range = ref<RangeId>('hour')
 const archiveMode = ref<Exclude<PresetId, 'custom'> | 'custom'>('7d')
@@ -258,6 +258,20 @@ const rows = computed<WeatherReading[]>(() => {
         }
     }
     return src
+})
+
+function onPreview(t: number | null) {
+    if (t == null) {
+        hoverPreview.value = null
+        return
+    }
+    const row = rows.value.find((r) => parseStamp(r.dstamp) === t)
+    hoverPreview.value = row ?? null
+}
+
+// When the range or series changes the chart remounts; drop any stale preview.
+watch([range, active], () => {
+    hoverPreview.value = null
 })
 
 function rawValue(row: WeatherReading, id: SeriesId) {

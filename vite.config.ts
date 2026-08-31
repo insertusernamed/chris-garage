@@ -1,22 +1,34 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { getHistory } from './api/_history.js'
+import { getHistory, getPastRange } from './api/_history.js'
 
 const UPSTREAM = 'https://chrisbarbati.ddns.net:2048'
 
-function historyPlugin(): Plugin {
+function serverApiPlugin(): Plugin {
   return {
     name: 'history-proxy',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        const url = req.url?.split('?')[0]
-        if (url !== '/api/history') {
-          next()
-          return
-        }
+        const url = new URL(req.url ?? '/', 'http://localhost')
+        let path = url.pathname
+        if (path.endsWith('/')) path = path.slice(0, -1)
+        let body: unknown
         try {
-          const body = await getHistory()
+          if (path === '/api/history') {
+            body = await getHistory()
+          } else if (path === '/api/archive') {
+            const range = await getPastRange({
+              days: url.searchParams.get('days') ?? undefined,
+              from: url.searchParams.get('from') ?? undefined,
+              to: url.searchParams.get('to') ?? undefined,
+              bucketHours: url.searchParams.get('bucket-hours') ?? undefined,
+            })
+            body = range.points
+          } else {
+            next()
+            return
+          }
           res.statusCode = 200
           res.setHeader('Content-Type', 'application/json')
           res.setHeader('Cache-Control', 'public, max-age=120')
@@ -33,7 +45,7 @@ function historyPlugin(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [vue(), historyPlugin()],
+  plugins: [vue(), serverApiPlugin()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

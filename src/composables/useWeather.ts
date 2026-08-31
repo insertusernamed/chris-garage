@@ -270,6 +270,40 @@ export function useWeather() {
     localStorage.setItem(UNIT_KEY, next)
   }
 
+  type ArchiveQuery = {
+    days?: number
+    from?: string
+    to?: string
+    bucketHours?: number
+  }
+
+  // Session-only memo: bounce between recently viewed windows without a round-trip.
+  const archiveCache = new Map<string, { at: number; rows: WeatherReading[] }>()
+  const ARCHIVE_CACHE_TTL_MS = 5 * 60 * 1000
+  const ARCHIVE_CACHE_MAX = 24
+
+  /** Fetch a window of past samples from the archive endpoint, newest first. */
+  async function queryArchive(query: ArchiveQuery): Promise<WeatherReading[]> {
+    const sp = new URLSearchParams()
+    if (query.bucketHours != null) sp.set('bucket-hours', String(query.bucketHours))
+    if (query.days != null) sp.set('days', String(query.days))
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+    const key = sp.toString()
+    const hit = archiveCache.get(key)
+    if (hit && Date.now() - hit.at < ARCHIVE_CACHE_TTL_MS) return hit.rows
+    const raw = await fetchJson<WeatherReading[]>(`/api/archive?${key}`)
+    const rows = (Array.isArray(raw) ? raw : [])
+      .map(normalize)
+      .filter((row): row is WeatherReading => row != null)
+    if (archiveCache.size >= ARCHIVE_CACHE_MAX) {
+      const oldest = archiveCache.keys().next().value
+      if (oldest !== undefined) archiveCache.delete(oldest)
+    }
+    archiveCache.set(key, { at: Date.now(), rows })
+    return rows
+  }
+
   return {
     unit,
     live,
@@ -291,6 +325,7 @@ export function useWeather() {
     rate,
     setUnit,
     pullHistory,
+    queryArchive,
     start,
     stop,
   }

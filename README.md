@@ -1,19 +1,33 @@
-# chris-weather
+# Chris's Garage
 
-A modern weather dashboard for monitoring garage conditions.
+A small weather dashboard for the Raspberry Pi SenseHAT in Chris's garage. It
+shows the live temperature, humidity, and pressure, the last hour of traces, and
+a lightweight archive you can browse back through.
 
 ## Features
 
--   Real-time temperature, humidity, and pressure monitoring
--   Archive view: browse past readings by quick windows (1 day to 1 year) or a custom
-    calendar date range, for temperature, humidity, or pressure
--   Comfort level descriptions based on temperature and humidity
--   Responsive design that works on all devices
--   Theme system with three modes:
-    -   Auto (changes based on time of day)
-    -   Light mode
-    -   Dark mode
--   Time-based background gradients
--   Debug information panel
--   Accessibility features including ARIA labels
--   OpenGraph tags for rich social media sharing
+- Live temperature, humidity, and pressure
+- Last-hour traces with a cursor that previews each reading
+- Archive browser with presets from 1 day to 1 year, or a custom date range, for
+  temperature, humidity, and pressure
+- Celsius / Fahrenheit toggle
+- Responsive and accessible
+
+## How it works
+
+A Vue + Vite single page pulls readings from two JSON endpoints served by
+[Chris's WeatherServer][weather] on the garage Pi, plus a WebSocket for live
+updates. Past data arrives pre-thinned on the server, so browsing years of
+history stays fast without overwhelming the Pi.
+
+## Acknowledgements
+
+Made possible by the Pi hardware and two projects from [Christian Barbati][chris]:
+
+- [SenseHat][sensehat]: the library that reads the SenseHAT sensors
+- [WeatherServer][weather]: the Spring Boot server on the Pi that stores and
+  serves the readings this dashboard consumes
+
+[chris]: https://github.com/chrisbarbati
+[sensehat]: https://github.com/chrisbarbati/SenseHat
+[weather]: https://github.com/chrisbarbati/WeatherServer
